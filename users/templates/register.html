@@ -1,28 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Register</title>
-    {% load static %}  <!-- Load static files -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <h2>Register</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | Your App</title>
+    {% load static %}
+    <!-- Load static files -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="login-box">
+        <div class="login-header">
+          <h2>Create Account</h2>
+          <p class="subtitle">Join our community today</p>
+        </div>
 
-    <!-- Display messages -->
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+        <!-- Display messages -->
+        {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div
+            class="message {% if message.tags %}{{ message.tags }}{% endif %}"
+          >
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
-    </form>
-    <a href="{% url 'login' %}">Already have an account? Log in</a>
-</body>
+        <form method="POST" class="login-form">
+          {% csrf_token %} {% for field in form %}
+          <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }} {% if field.errors %}
+            <div class="field-error">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          <div class="form-group">
+            <button type="submit" class="login-btn">Create Account</button>
+          </div>
+        </form>
+
+        <div class="login-footer">
+          <p>
+            Already have an account?
+            <a href="{% url 'login' %}" class="register-link">Login here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
