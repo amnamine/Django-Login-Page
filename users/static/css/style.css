@@ -237,3 +237,34 @@ body {
         max-width: 100%;
     }
 }
+
+/* Add these styles to improve UI/UX */
+.card {
+    border-radius: 15px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+.clicker-button {
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.clicker-button:hover {
+    background-color: #1e7e34; /* Darker shade on hover */
+}
+
+.score-display {
+    font-size: 48px;
+    font-weight: bold;
+    color: #4caf50; /* Change color to match primary theme */
+    text-align: center;
+    margin: 20px 0;
+    transition: color 0.3s;
+}
+
+.score-display:hover {
+    color: #388e3c; /* Darker shade on hover */
+}

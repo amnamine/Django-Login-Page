@@ -1,39 +1,95 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home | Your App</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div class="container">
-      <div class="home-box">
-        <div class="home-header">
-          <h2>Welcome to Your App</h2>
-          <p class="subtitle">You have successfully logged in!</p>
-        </div>
-
-        <div class="home-content">
-          <div class="welcome-message">
-            <p>
-              Thank you for choosing our platform. We're glad to have you here!
-            </p>
-          </div>
-
-          <div class="action-buttons">
-            <a href="{% url 'login' %}" class="action-btn login-btn">Login</a>
-            <a href="{% url 'register' %}" class="action-btn register-btn"
-              >Register</a
-            >
-          </div>
-        </div>
+{% extends 'base.html' %} {% block content %}
+<div class="row">
+  <div class="col-md-8">
+    {% if user.is_authenticated %}
+    <div class="card">
+      <div class="card-body text-center">
+        <h2 class="card-title mb-4">
+          Your Score: <span id="score-display">{{ user_score.score }}</span>
+        </h2>
+        <button id="clicker-button" class="clicker-button">Click Me!</button>
       </div>
     </div>
-  </body>
-</html>
+    {% else %}
+    <div class="card">
+      <div class="card-body text-center">
+        <h2 class="card-title">Welcome to the Clicker Game!</h2>
+        <p class="card-text">Please login or register to start playing.</p>
+        <a href="{% url 'login' %}" class="btn btn-primary me-2">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title mb-0">Top Players</h3>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush" id="leaderboard-list">
+          {% for score in top_scores %}
+          <li
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ score.user.username }}
+            <span class="badge bg-primary rounded-pill">{{ score.score }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %} {% if user.is_authenticated %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const clickerButton = document.getElementById("clicker-button");
+    const scoreDisplay = document.getElementById("score-display");
+    const leaderboardList = document.getElementById("leaderboard-list");
+
+    // Function to update leaderboard
+    function updateLeaderboard() {
+      fetch('{% url "get_leaderboard" %}', {
+        method: "GET",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          leaderboardList.innerHTML = "";
+          data.forEach((player) => {
+            const listItem = document.createElement("li");
+            listItem.className =
+              "list-group-item d-flex justify-content-between align-items-center";
+            listItem.innerHTML = `${player.username} <span class="badge bg-primary rounded-pill">${player.score}</span>`;
+            leaderboardList.appendChild(listItem);
+          });
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+
+    // Click handler for the button
+    clickerButton.addEventListener("click", function () {
+      fetch('{% url "increment_score" %}', {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          scoreDisplay.textContent = data.score;
+          updateLeaderboard(); // Update leaderboard after score change
+        })
+        .catch((error) => console.error("Error:", error));
+    });
+
+    // Update leaderboard every 5 seconds
+    setInterval(updateLeaderboard, 5000);
+  });
+</script>
+{% endif %} {% endblock %}
